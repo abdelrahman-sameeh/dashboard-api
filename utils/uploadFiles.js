@@ -11,46 +11,25 @@ const ensureDirExists = (dir) => {
 // Set storage engine
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    let uploadPath = "";
-    if (file.fieldname === "image") {
-      uploadPath = path.join("uploads", "images");
-    } else if (file.fieldname === "bookFile") {
-      uploadPath = path.join("uploads", "books");
-    }
+    const uploadPath = path.join("uploads", 'packages');
+    
     ensureDirExists(uploadPath);
-    cb(null, uploadPath);
+    cb(null, uploadPath); 
   },
   filename: (req, file, cb) => {
-    cb(
-      null,
-      file.fieldname + "-" + Date.now() + path.extname(file.originalname)
-    );
-  },
+    const originalName = path.basename(file.originalname, path.extname(file.originalname));
+    const fileExtension = path.extname(file.originalname);
+    const timestamp = Date.now();
+    cb(null, `${originalName}-${timestamp}${fileExtension}`);
+  }
 });
 
-// Init upload
+// Init multer upload
 const upload = multer({
   storage: storage,
   fileFilter: (req, file, cb) => {
-    if (file.fieldname === "image") {
-      checkImageFileType(file, cb);
-    } else if (file.fieldname === "bookFile") {
-      cb(null, true);
-    }
-  },
-});
-
-// Check Image File Type
-function checkImageFileType(file, cb) {
-  const filetypes = /jpeg|jpg|png|gif/;
-  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = filetypes.test(file.mimetype);
-
-  if (mimetype && extname) {
-    return cb(null, true);
-  } else {
-    cb("Error: Images Only!");
+    cb(null, true);
   }
-}
+});
 
 module.exports = upload;

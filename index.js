@@ -7,6 +7,7 @@ const connectDB = require("./api/connectDB");
 const httpStatus = require("./utils/httpStatus");
 
 const authRouter = require("./routes/auth.routes");
+const packageRoute = require("./routes/package.routes");
 const cors = require("cors");
 
 const app = express();
@@ -24,6 +25,7 @@ if (process.env.MODE == "dev") {
 
 app.use(express.json());
 app.use("/api/v1", authRouter);
+app.use("/api/v1", packageRoute);
 
 app.all("*", (req, res) => {
   return res.status(404).json({ error: "not found this route" });

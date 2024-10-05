@@ -35,7 +35,7 @@ const register = asyncHandler(async (req, res, next) => {
   res.status(201).json({
     status: "success",
     data: {
-      user,
+      user: payload,
       token,
     },
   });
@@ -53,9 +53,6 @@ const login = asyncHandler(async (req, res, next) => {
     name: user.name,
     email: user.email,
     role: user.role,
-    picture: user.picture || null,
-    stripeAccountId: user.stripeAccountId || null,
-    completedBoarding: user.completedBoarding || null,
   };
 
   // generate token
@@ -134,6 +131,7 @@ const changePassword = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user._id);
   const hashed = await bcrypt.hash(password, 10);
   user.password = hashed;
+  user.lastResetPasswordDate = new Date();
   await user.save();
 
   res.status(200).json({
@@ -150,9 +148,6 @@ const getLoggedUser = asyncHandler(async (req, res, next) => {
     name: user.name,
     email: user.email,
     role: user.role,
-    picture: user.picture,
-    stripeAccountId: user.stripeAccountId,
-    completedBoarding: user.completedBoarding,
   };
 
   return res.status(200).json({
