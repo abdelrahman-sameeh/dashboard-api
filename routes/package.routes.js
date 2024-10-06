@@ -18,7 +18,7 @@ const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 router
-  .route("/package")
+  .route("/packages")
   .post(
     isAuth,
     allowTo("admin"),

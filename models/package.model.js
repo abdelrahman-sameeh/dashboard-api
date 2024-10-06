@@ -15,6 +15,10 @@ const packageSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+packageSchema.post('save', async function(doc) {
+  await doc.populate({path: 'admin', select: 'name email'});
+});
+
 const Package = mongoose.model("Package", packageSchema);
 
 module.exports = Package;

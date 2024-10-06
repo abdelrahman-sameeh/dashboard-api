@@ -52,7 +52,7 @@ const createPackage = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const newPackage = new Package(data);
+  let newPackage = new Package(data);
   await newPackage.save();
 
   res.status(201).json({ status: "success", package: newPackage });
@@ -76,7 +76,11 @@ const getOnePackage = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 
   // Find the package by ID
-  const package = await Package.findById(id);
+  const package = await Package.findById(id).populate({
+    path: "admin",
+    select: "name email",
+  });
+
   if (!package) {
     return res.status(404).json({
       message: "Package not found.",
@@ -92,6 +96,20 @@ const getOnePackage = asyncHandler(async (req, res, next) => {
 
 const updatePackage = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
+
+  // check if updated package name already used
+  if(req.body.name){
+    const existingPackage = await Package.findOne({
+      name: { $regex: new RegExp(`^${req.body.name}$`, "i") },
+      _id: { $ne: id } 
+    });
+
+    if (existingPackage) {
+      return res.status(400).json({
+        message: `package already exists`, 
+      });
+    }
+  }
 
   // Find the existing package
   const existingPackage = await Package.findById(id);
@@ -176,6 +194,9 @@ const updatePackage = asyncHandler(async (req, res, next) => {
   const updatedPackage = await Package.findByIdAndUpdate(id, updates, {
     new: true,
     runValidators: true,
+  }).populate({
+    path: "admin",
+    select: "name email",
   });
 
   res.status(200).json({
