@@ -106,7 +106,7 @@ const forgetPassword = asyncHandler(async (req, res, next) => {
   // check if time still less than user.resetCodeExpire
   const currentTime = new Date();
   if (currentTime > user.resetCodeExpire) {
-    return next(new ApiError("Reset code has expired", 400));
+    return next(new ApiError("reset code has expired", 400));
   }
 
   const matchResetCode = await bcrypt.compare(req.body.code, user.resetCode);
