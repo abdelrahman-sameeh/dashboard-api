@@ -8,6 +8,7 @@ const httpStatus = require("./utils/httpStatus");
 
 const authRouter = require("./routes/auth.routes");
 const packageRoute = require("./routes/package.routes");
+const mailRoute = require("./routes/mail.routes");
 const cors = require("cors");
 
 const app = express();
@@ -26,6 +27,7 @@ if (process.env.MODE == "dev") {
 app.use(express.json());
 app.use("/api/v1", authRouter);
 app.use("/api/v1", packageRoute);
+app.use("/api/v1", mailRoute);
 
 app.all("*", (req, res) => {
   return res.status(404).json({ error: "not found this route" });

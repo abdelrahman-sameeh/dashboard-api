@@ -18,3 +18,23 @@ exports.sendEmail = async (to, subject, text) => {
 
   await transporter.sendMail(mailOptions);
 };
+
+
+// ----------------------
+// const nodemailer = require('nodemailer');
+// const awsConfig = require('../config/aws.config');
+
+// exports.sendEmail = async (to, subject, text) => {
+//   const transporter = nodemailer.createTransport({
+//     SES: awsConfig.ses,
+//   });
+
+//   const mailOptions = {
+//     from: process.env.SEND_EMAIL_USER, 
+//     to,
+//     subject,
+//     text
+//   };
+
+//   await transporter.sendMail(mailOptions);
+// };
