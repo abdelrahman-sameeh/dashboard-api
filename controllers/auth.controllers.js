@@ -78,11 +78,14 @@ const sendResetCode = asyncHandler(async (req, res, next) => {
   const encryptedResetCode = await bcrypt.hash(resetCode, 10);
 
   // send email
-  await sendEmail(
+  const emailStatus = await sendEmail(
     user.email,
     "Your password reset code",
     `Your reset code is: ${resetCode}`
   );
+
+  if(!emailStatus.status) return next(new ApiError('failed to send email', 400))
+
   user.resetCode = encryptedResetCode;
   // make this (now + 10min)
   user.resetCodeExpire = new Date(Date.now() + 10 * 60 * 1000);

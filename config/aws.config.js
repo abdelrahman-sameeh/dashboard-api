@@ -1,14 +1,10 @@
-const { SESClient } = require("@aws-sdk/client-ses");
+let AWS = require('aws-sdk')
+const { AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY } = process.env;
 
-const awsConfig = {
-  region: process.env.AWS_REGION,
-  ses: new SESClient({
-    region: process.env.AWS_REGION,
-    credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID, // Access key from environment variable
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, // Secret key from environment variable
-    },
-  }),
-};
+AWS.config.update({
+  accessKeyId: AWS_ACCESS_KEY_ID,
+  secretAccessKey: AWS_SECRET_ACCESS_KEY,
+  region: AWS_REGION,
+});
 
-module.exports = awsConfig;
+module.exports = AWS;

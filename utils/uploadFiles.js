@@ -9,9 +9,10 @@ const ensureDirExists = (dir) => {
 };
 
 // Set storage engine
-const storage = multer.diskStorage({
+const storage = directory => multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join("uploads", 'packages');
+    // need here to make package as variable
+    const uploadPath = path.join("uploads", directory);
     
     ensureDirExists(uploadPath);
     cb(null, uploadPath); 
@@ -25,8 +26,8 @@ const storage = multer.diskStorage({
 });
 
 // Init multer upload
-const upload = multer({
-  storage: storage,
+const upload = (directory) => multer({
+  storage: storage(directory),
   fileFilter: (req, file, cb) => {
     cb(null, true);
   }

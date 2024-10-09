@@ -1,40 +1,43 @@
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
+const AWS = require("../config/aws.config");
+const { AWS_SEND_EMAIL_USER } = process.env;
 
-exports.sendEmail = async (to, subject, text) => {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail', 
-    auth: {
-      user: process.env.SEND_EMAIL_USER,
-      pass: process.env.SEND_EMAIL_PASS
-    }
-  });
+// Create Nodemailer transporter using AWS SES
+const transporter = nodemailer.createTransport({
+  SES: new AWS.SES({ apiVersion: "2010-12-01" }),
+});
 
+// Send email with attachment
+exports.sendEmail = async (
+  to,
+  subject,
+  text = "",
+  html = "",
+  attachments = []
+) => {
   const mailOptions = {
-    from: process.env.SEND_EMAIL_USER,
+    from: AWS_SEND_EMAIL_USER,
     to,
-    subject,
-    text
+    subject: subject,
   };
 
-  await transporter.sendMail(mailOptions);
+  if (text) {
+    mailOptions.text = text;
+  }
+
+  if (html) {
+    mailOptions.html = html;
+  }
+
+  if (attachments.length) {
+    mailOptions.attachments = attachments;
+  }
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return { message: "success", status: true };
+  } catch (err) {
+    console.log(err);
+    return { message: err.message, status: false };
+  }
 };
-
-
-// ----------------------
-// const nodemailer = require('nodemailer');
-// const awsConfig = require('../config/aws.config');
-
-// exports.sendEmail = async (to, subject, text) => {
-//   const transporter = nodemailer.createTransport({
-//     SES: awsConfig.ses,
-//   });
-
-//   const mailOptions = {
-//     from: process.env.SEND_EMAIL_USER, 
-//     to,
-//     subject,
-//     text
-//   };
-
-//   await transporter.sendMail(mailOptions);
-// };

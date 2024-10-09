@@ -6,8 +6,8 @@ const fs = require("fs");
 const path = require("path");
 const xlsx = require("xlsx");
 const ApiError = require("../utils/ApiError");
-const { SendEmailCommand } = require("@aws-sdk/client-ses");
 const awsConfig = require("../config/aws.config");
+const { sendEmail } = require("../utils/sendEmailSetup");
 
 // Function to translate JSON keys
 const _translatedData = (jsonData) =>
@@ -50,40 +50,26 @@ const _addClient = async (name, email) => {
   }
 };
 
-// Function to send email
-const _sendEmail = async (toEmail, subject, body) => {
-  const params = {
-    Source: process.env.AWS_SES_SOURCE_EMAIL, 
-    Destination: {
-      ToAddresses: [toEmail],
-    },
-    Message: {
-      Subject: {
-        Data: subject,
-      },
-      Body: {
-        Html: {
-          Data: body,
-        },
-      },
-    },
-  };
-
-  try {
-    const command = new SendEmailCommand(params);
-    await awsConfig.ses.send(command);
-    return true; 
-  } catch (error) {
-    console.error("Error sending email:", error);
-    return false;
-  }
-};
-
 const sendMail = asyncHandler(async (req, res, next) => {
   const { clientName, clientEmail, mailSubject, mailBody } = req.body;
+  let attachments = [];
+  const cvFilePath = path.join(__dirname, "..", req.file.path);
+
+  if (fs.existsSync(cvFilePath)) {
+    attachments = [
+      {
+        filename: req.file.filename,
+        path: cvFilePath,
+      },
+    ];
+  }
 
   const package = await Package.findById(req.body.package);
-  
+
+  if(!package){
+    return next(new ApiError('package not found', 404))
+  }
+
   const excelSheetPath = path.join(
     __dirname,
     "..",
@@ -93,23 +79,20 @@ const sendMail = asyncHandler(async (req, res, next) => {
   );
 
   if (!fs.existsSync(excelSheetPath)) {
-    return next(new ApiError("File path does not exist", 400));
+    return next(new ApiError("package file not found", 404));
   }
 
   const workbook = xlsx.readFile(excelSheetPath);
   const sheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
   const jsonData = xlsx.utils.sheet_to_json(worksheet);
-
   const translated = _translatedData(jsonData);
-  
   const clientId = await _addClient(clientName, clientEmail);
 
-  for (let i = 0; i < translated.length; i++) {
+  for (let i = 0; i < 4; i++) {
     const companyData = translated[i];
-    const emailSent = await _sendEmail(clientEmail, mailSubject, mailBody);
-
-    // Save email status
+    const emailSent = await sendEmail(companyData.email, mailSubject, null, mailBody, attachments);
+    // // Save email status
     await Mail.create({
       client: clientId,
       admin: req.user._id,
@@ -118,13 +101,17 @@ const sendMail = asyncHandler(async (req, res, next) => {
       companyName: companyData.name,
       companyActivity: companyData.activity,
       companyLocation: companyData.location,
-      status: emailSent, // Email sent status
+      status: emailSent.status,
     });
   }
 
+  // remove cv attachments
+  if(req.file){
+    fs.unlink(cvFilePath, (err) => {});
+  }
+
   res.status(200).json({
-    message: "Clients processed successfully",
-    data: translated,
+    message: "mails send successfully",
   });
 });
 

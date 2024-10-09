@@ -22,7 +22,7 @@ router
   .post(
     isAuth,
     allowTo("admin"),
-    upload.single("file"),
+    upload('packages').single("file"),
     createPackageValidator,
     createPackage
   )
@@ -34,7 +34,7 @@ router
   .patch(
     isAuth,
     allowTo("admin"),
-    upload.single("file"),
+    upload('packages').single("file"),
     updatePackageValidator,
     updatePackage
   )
