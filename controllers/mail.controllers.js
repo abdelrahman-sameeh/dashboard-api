@@ -7,6 +7,7 @@ const path = require("path");
 const xlsx = require("xlsx");
 const ApiError = require("../utils/ApiError");
 const { sendEmail } = require("../utils/sendEmailSetup");
+const Pagination = require("../utils/Pagination");
 
 // Function to translate JSON keys
 const _translatedData = (jsonData) =>
@@ -101,8 +102,13 @@ const _sendEmailsToCompanies = async (
 };
 
 const sendMail = asyncHandler(async (req, res, next) => {
-  const { clientName, clientEmail, mailSubject, mailBody, package: packageId } =
-    req.body;
+  const {
+    clientName,
+    clientEmail,
+    mailSubject,
+    mailBody,
+    package: packageId,
+  } = req.body;
   const file = req.file;
   let attachments = [];
 
@@ -151,6 +157,41 @@ const sendMail = asyncHandler(async (req, res, next) => {
   res.status(200).json({ message: "mails sent successfully" });
 });
 
+
+const getClientMails = asyncHandler(async (req, res) => {
+  const { page, limit, sort, status } = req.query; // Get page, limit, sort, and status from query params
+  const { id } = req.params; // Get client ID from URL params
+
+  // Query to filter mails by client ID and status if provided
+  const query = {
+    client: id,
+    ...(status !== undefined && { status: status }), // Filter by status if provided
+  };
+
+  // Fields to populate (admin and package)
+  const populateFields = [
+    { field: "admin", select: "name email" },
+    { field: "package", select: "name capacity price" },
+  ];
+
+  // Create Pagination instance
+  const pagination = new Pagination(
+    "mails", // The name of the resource
+    Mail, // Mongoose model
+    query, // Query
+    page, // Page
+    limit, // Limit
+    sort, // Sort
+    populateFields // Fields to populate
+  );
+
+  // Get paginated results
+  const results = await pagination.paginate();
+
+  // Send the response
+  res.status(200).json(results);
+});
 module.exports = {
   sendMail,
+  getClientMails,
 };

@@ -5,9 +5,6 @@ const bcrypt = require("bcryptjs");
 const { createToken } = require("../utils/createToken");
 const { sendEmail } = require("../utils/sendEmailSetup");
 const jwt = require("jsonwebtoken");
-const {
-  generateSecureRandomString,
-} = require("../utils/generateSecureRandomString");
 
 const register = asyncHandler(async (req, res, next) => {
   const existingUser = await User.findOne({ email: req.body.email });

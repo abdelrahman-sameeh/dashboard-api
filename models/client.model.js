@@ -2,9 +2,7 @@ const { default: mongoose } = require("mongoose");
 
 const clientSchema = new mongoose.Schema({
   name: String,
-  email: {
-    type: String,
-  },
+  email: String,
   registerCount: Number
 }, {timestamps: true})
 
