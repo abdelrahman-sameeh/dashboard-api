@@ -10,6 +10,7 @@ const authRouter = require("./routes/auth.routes");
 const packageRoute = require("./routes/package.routes");
 const mailRoute = require("./routes/mail.routes");
 const clientRoute = require("./routes/client.routes");
+const dashboard = require("./routes/dashboard.router");
 
 const cors = require("cors");
 
@@ -31,6 +32,7 @@ app.use("/api/v1", authRouter);
 app.use("/api/v1", packageRoute);
 app.use("/api/v1", mailRoute);
 app.use("/api/v1", clientRoute);
+app.use("/api/v1", dashboard);
 
 app.all("*", (req, res) => {
   return res.status(404).json({ error: "not found this route" });
