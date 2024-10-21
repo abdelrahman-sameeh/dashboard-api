@@ -9,6 +9,7 @@ const transporter = nodemailer.createTransport({
 
 // Send email with attachment
 exports.sendEmail = async (
+  spam = false,
   to,
   subject,
   text = "",
@@ -16,7 +17,7 @@ exports.sendEmail = async (
   attachments = []
 ) => {
   const mailOptions = {
-    from: AWS_SEND_EMAIL_USER,
+    from: spam ? "test@saajobs.com" : AWS_SEND_EMAIL_USER,
     to,
     subject: subject,
   };

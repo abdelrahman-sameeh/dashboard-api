@@ -80,6 +80,7 @@ const _sendEmailsToCompanies = async (
   for (let i = 0; i < 4; i++) {
     const companyData = translatedData[i];
     const emailSent = await sendEmail(
+      false,
       companyData.email,
       mailSubject,
       null,

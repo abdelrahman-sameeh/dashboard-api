@@ -76,6 +76,7 @@ const sendResetCode = asyncHandler(async (req, res, next) => {
 
   // send email
   const emailStatus = await sendEmail(
+    false,
     user.email,
     "Your password reset code",
     `Your reset code is: ${resetCode}`
