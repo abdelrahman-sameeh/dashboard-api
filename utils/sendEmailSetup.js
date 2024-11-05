@@ -1,44 +1,88 @@
 const nodemailer = require("nodemailer");
-const AWS = require("../config/aws.config");
-const { AWS_SEND_EMAIL_USER } = process.env;
+const sgMail = require("@sendgrid/mail");
+const fs = require("fs");
+const {
+  SENDGRID_API_KEY,
+  SEND_GRID_EMAIL,
+  SEND_EMAIL_USER_CHECK,
+  SEND_EMAIL_PASS_CHECK,
+} = process.env;
 
-// Create Nodemailer transporter using AWS SES
-const transporter = nodemailer.createTransport({
-  SES: new AWS.SES({ apiVersion: "2010-12-01" }),
-});
+sgMail.setApiKey(SENDGRID_API_KEY);
 
-// Send email with attachment
+const _sendEmailWithSendGrid = async (to, subject, text, html, attachments) => {
+  const msg = {
+    to,
+    from: SEND_GRID_EMAIL,
+    subject,
+  };
+
+  if (text) msg.text = text;
+  if (html) msg.html = html;
+
+  if (attachments.length) {
+    msg.attachments = attachments.map((attachment) => {
+      const filePath = attachment.path;
+      const fileContent = fs.readFileSync(filePath).toString("base64");
+      return {
+        content: fileContent,
+        filename: attachment.filename,
+        type: "application/pdf",
+        disposition: "attachment",
+      };
+    });
+  }
+
+  try {
+    await sgMail.send(msg);
+    return { message: "success", status: true };
+  } catch (error) {
+    return { message: error.message, status: false };
+  }
+};
+
+const _sendEmailWithNodemailer = async (
+  to,
+  subject = "test",
+  text = "test"
+) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: SEND_EMAIL_USER_CHECK,
+      pass: SEND_EMAIL_PASS_CHECK,
+    },
+  });
+
+  const mailOptions = {
+    from: SEND_EMAIL_USER_CHECK,
+    to,
+    subject,
+    text,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return { message: "success", status: true };
+  } catch (error) {
+    return { message: error.message, status: false };
+  }
+};
+
+// الدالة الرئيسية لإرسال الإيميل بناءً على قيمة check
 exports.sendEmail = async (
-  spam = false,
+  check = false,
   to,
   subject,
   text = "",
   html = "",
   attachments = []
 ) => {
-  const mailOptions = {
-    from: spam ? "test@saajobs.com" : AWS_SEND_EMAIL_USER,
-    to,
-    subject: subject,
-  };
-
-  if (text) {
-    mailOptions.text = text;
-  }
-
-  if (html) {
-    mailOptions.html = html;
-  }
-
-  if (attachments.length) {
-    mailOptions.attachments = attachments;
-  }
-
-  try {
-    await transporter.sendMail(mailOptions);
-    return { message: "success", status: true };
-  } catch (err) {
-    console.log(err);
-    return { message: err.message, status: false };
+  if (!check) {
+    // استخدم SendGrid
+    return await _sendEmailWithSendGrid(to, subject, text, html, attachments);
+  } else {
+    // استخدم Nodemailer
+    return await _sendEmailWithNodemailer(to, subject, text);
   }
 };

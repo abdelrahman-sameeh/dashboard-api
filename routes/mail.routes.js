@@ -1,6 +1,6 @@
 const express = require("express");
 const { isAuth, allowTo } = require("../controllers/auth.controllers");
-const { sendMail, getClientMails } = require("../controllers/mail.controllers");
+const { sendMail, getClientMails, checkMail } = require("../controllers/mail.controllers");
 const upload = require("../utils/uploadFiles");
 
 const router = express.Router();
@@ -14,5 +14,7 @@ router
     sendMail
   )
   .get("/mails/client/:id", isAuth, allowTo("admin"), getClientMails);
+
+router.post('/check-mail', isAuth, allowTo('admin'), checkMail)
 
 module.exports = router;
