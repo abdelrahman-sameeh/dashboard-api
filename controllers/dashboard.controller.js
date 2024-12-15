@@ -40,14 +40,18 @@ exports.getEmailsStatus = asyncHandler(async (req, res) => {
 // إحصائيات المستخدمين
 exports.getClientsStats = asyncHandler(async (req, res) => {
   const period = req.query.period || "week";
-  let dateFrom;
+  let dateFrom = new Date();
 
-  if (period === "week") {
-    dateFrom = new Date();
-    dateFrom.setDate(dateFrom.getDate() - 7);
-  } else if (period === "month") {
-    dateFrom = new Date();
-    dateFrom.setMonth(dateFrom.getMonth() - 1);
+  switch (period) {
+    case "week":
+      dateFrom.setDate(dateFrom.getDate() - 7);
+      break;
+    case "month":
+      dateFrom.setMonth(dateFrom.getMonth() - 1);
+      break;
+    default:
+      dateFrom.setHours(0, 0, 0, 0);
+      break;
   }
 
   const newClients = await Client.countDocuments({
@@ -66,4 +70,3 @@ exports.getPackagesCount = asyncHandler(async (req, res) => {
   const packagesCount = await Package.countDocuments();
   res.status(200).json({ packagesCount });
 });
-
