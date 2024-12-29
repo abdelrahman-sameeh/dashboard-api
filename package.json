@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index",
-    "start": "MODE=prod nodemon index"
+    "start": "MODE=prod node index"
   },
   "author": "Abdelrahman Sameeh",
   "license": "ISC",
