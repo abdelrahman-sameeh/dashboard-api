@@ -8,7 +8,7 @@ const xlsx = require("xlsx");
 const ApiError = require("../utils/ApiError");
 const { sendEmail } = require("../utils/sendEmailSetup");
 const Pagination = require("../utils/Pagination");
-const dns = require('dns').promises;
+const dns = require("dns").promises;
 
 // Function to translate JSON keys
 const _translatedData = (jsonData) =>
@@ -70,7 +70,7 @@ const _readExcelSheet = (filePath) => {
 
 // Helper function to send emails and log the result
 const _sendEmailsToCompanies = async (
-  translatedData,
+  translatedData = [],
   mailSubject,
   mailBody,
   attachments,
@@ -78,7 +78,7 @@ const _sendEmailsToCompanies = async (
   adminId,
   packageId
 ) => {
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < translatedData.length; i++) {
     const companyData = translatedData[i];
     const emailSent = await sendEmail(
       false,
@@ -193,26 +193,25 @@ const getClientMails = asyncHandler(async (req, res) => {
   res.status(200).json(results);
 });
 
-
 const checkMail = async (req, res, next) => {
   const { email } = req.body;
   if (!email) {
-    return next(new ApiError('Email is required', 400));
+    return next(new ApiError("Email is required", 400));
   }
 
   // Extract domain from email
-  const domain = email.split('@')[1];
+  const domain = email.split("@")[1];
   if (!domain) {
-    return next(new ApiError('invalid email format', 400));
+    return next(new ApiError("invalid email format", 400));
   }
 
-  try{
+  try {
     const addresses = await dns.resolveMx(domain);
     if (!addresses.length) {
-      return next(new ApiError('invalid email address', 400));
+      return next(new ApiError("invalid email address", 400));
     }
 
-    const emailResponse = await sendEmail(true, email)
+    const emailResponse = await sendEmail(true, email);
     if (emailResponse.status) {
       return res.status(200).json({
         message: "email sent successfully",
@@ -224,18 +223,15 @@ const checkMail = async (req, res, next) => {
         error: emailResponse.message,
       });
     }
-  }catch(err){
-    return next(new ApiError('invalid email address', 400));
+  } catch (err) {
+    return next(new ApiError("invalid email address", 400));
   }
-}
+};
 
 module.exports = checkMail;
-
-
-
 
 module.exports = {
   sendMail,
   getClientMails,
-  checkMail
+  checkMail,
 };

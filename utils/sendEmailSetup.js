@@ -3,7 +3,7 @@ const sgMail = require("@sendgrid/mail");
 const fs = require("fs");
 const {
   SENDGRID_API_KEY,
-  SEND_GRID_EMAIL,
+  SEND_GRID_EMAIL="HR@saajobs.com",
   SEND_EMAIL_USER_CHECK,
   SEND_EMAIL_PASS_CHECK,
 } = process.env;
