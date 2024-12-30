@@ -7,6 +7,7 @@ const {
   changePassword,
   getLoggedUser,
   register,
+  removeUser,
 } = require("../controllers/auth.controllers");
 const {
   registerValidator,
@@ -23,5 +24,7 @@ router.post("/resetCode", sendResetCode);
 router.post("/forgetPassword", forgetPasswordValidator, forgetPassword);
 router.post("/changePassword", isAuth, changePasswordValidator, changePassword);
 router.get("/auth", isAuth, getLoggedUser);
+
+router.delete("/user", isAuth, removeUser);
 
 module.exports = router;

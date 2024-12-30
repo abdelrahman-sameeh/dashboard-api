@@ -82,7 +82,8 @@ const sendResetCode = asyncHandler(async (req, res, next) => {
     `Your reset code is: ${resetCode}`
   );
 
-  if(!emailStatus.status) return next(new ApiError('failed to send email', 400))
+  if (!emailStatus.status)
+    return next(new ApiError("failed to send email", 400));
 
   user.resetCode = encryptedResetCode;
   // make this (now + 10min)
@@ -203,6 +204,15 @@ const allowTo =
     next();
   };
 
+const removeUser = asyncHandler(async (req, res, next) => {
+  const { email } = req.body;
+  const user = await User.findOneAndDelete({ email });
+  if (!user) {
+    return next(new ApiError("User not found", 404));
+  }
+  return res.status(204).json({});
+});
+
 module.exports = {
   register,
   login,
@@ -212,4 +222,5 @@ module.exports = {
   isAuth,
   allowTo,
   getLoggedUser,
+  removeUser,
 };
