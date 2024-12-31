@@ -21,7 +21,7 @@ app.use(express.static("./public"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use(cors({
-  origin: "*"
+  origin: ["*", "https://seajobs.netlify.app"]
 }));
 
 
