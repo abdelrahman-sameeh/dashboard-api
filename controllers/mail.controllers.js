@@ -122,7 +122,7 @@ const _sendEmailsToCompanies = async (
 </html>
   `;
 
-  for (let i = 0; i < 1 /*translatedData.length*/; i++) {
+  for (let i = 0; i < translatedData.length; i++) {
     const companyData = translatedData[i];
     const emailSent = await sendEmail(
       false,
