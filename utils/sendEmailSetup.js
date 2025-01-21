@@ -13,7 +13,7 @@ sgMail.setApiKey(SENDGRID_API_KEY);
 const _sendEmailWithSendGrid = async (to, subject, text, html, attachments) => {
   const msg = {
     to,
-    from: SEND_GRID_EMAIL,
+    from: `'منصة سعى' <${SEND_GRID_EMAIL}>`,
     subject,
   };
 

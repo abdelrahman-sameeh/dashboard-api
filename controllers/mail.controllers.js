@@ -70,6 +70,7 @@ const _readExcelSheet = (filePath) => {
 
 // Helper function to send emails and log the result
 const _sendEmailsToCompanies = async (
+  emailLanguage="ar",
   translatedData = [],
   mailSubject,
   mailBody,
@@ -78,14 +79,57 @@ const _sendEmailsToCompanies = async (
   adminId,
   packageId
 ) => {
-  for (let i = 0; i < translatedData.length; i++) {
+  const html = `
+  <html dir="${emailLanguage == "ar" ? "rtl" : "ltr"}">
+  <head>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        background-color: #f9f9f9;
+      }
+      .content {
+        max-width: 100%;
+        width: 100%;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+      }
+      .content p {
+        margin-bottom: 10px;
+        font-size: 16px;
+        color: #333;
+      }
+      .rtl p{
+      text-align: end;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="content ${emailLanguage == "ar" ? "rtl" : ""}">
+      ${mailBody}
+    </div>
+  </body>
+</html>
+  `;
+
+  for (let i = 0; i < 1 /*translatedData.length*/; i++) {
     const companyData = translatedData[i];
     const emailSent = await sendEmail(
       false,
       companyData.email,
       mailSubject,
       undefined,
-      mailBody,
+      html,
       attachments
     );
 
@@ -110,6 +154,7 @@ const sendMail = asyncHandler(async (req, res, next) => {
     mailSubject,
     mailBody,
     package: packageId,
+    emailLanguage,
   } = req.body;
   const file = req.file;
   let attachments = [];
@@ -144,6 +189,7 @@ const sendMail = asyncHandler(async (req, res, next) => {
   const translatedData = _readExcelSheet(excelSheetPath);
   const clientId = await _addClient(clientName, clientEmail);
   await _sendEmailsToCompanies(
+    emailLanguage,
     translatedData,
     mailSubject,
     mailBody,
