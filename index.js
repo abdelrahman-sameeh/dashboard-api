@@ -14,6 +14,8 @@ const dashboard = require("./routes/dashboard.router");
 
 const cors = require("cors");
 
+require("./jobs/remove-cvs")
+
 const app = express();
 connectDB();
 
@@ -21,7 +23,7 @@ app.use(express.static("./public"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use(cors({
-  origin: ["https://seajobs.netlify.app"]
+  // origin: ["https://seajobs.netlify.app"]
 }));
 
 

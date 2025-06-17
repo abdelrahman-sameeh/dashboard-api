@@ -8,6 +8,7 @@ const xlsx = require("xlsx");
 const ApiError = require("../utils/ApiError");
 const { sendEmail } = require("../utils/sendEmailSetup");
 const Pagination = require("../utils/Pagination");
+const emailQueue = require("../jobs/email-queue");
 const dns = require("dns").promises;
 
 // Function to translate JSON keys
@@ -122,29 +123,18 @@ const _sendEmailsToCompanies = async (
 </html>
   `;
 
-  for (let i = 0; i < translatedData.length; i++) {
-    const companyData = translatedData[i];
-    const emailSent = await sendEmail(
-      false,
-      companyData.email,
+  translatedData.forEach(companyData => {
+    emailQueue.push({
+      companyData,
       mailSubject,
-      undefined,
       html,
-      attachments
-    );
-
-    // Save email status
-    await Mail.create({
-      client: clientId,
-      admin: adminId,
-      package: packageId,
-      companyEmail: companyData.email,
-      companyName: companyData.name,
-      companyActivity: companyData.activity,
-      companyLocation: companyData.location,
-      status: emailSent.status,
+      attachments,
+      clientId,
+      adminId,
+      packageId
     });
-  }
+  });
+
 };
 
 const sendMail = asyncHandler(async (req, res, next) => {
@@ -200,7 +190,7 @@ const sendMail = asyncHandler(async (req, res, next) => {
   );
 
   // Cleanup CV file if it exists
-  _removeFileIfExists(cvFilePath);
+  // _removeFileIfExists(cvFilePath);
 
   res.status(200).json({ message: "mails sent successfully" });
 });
