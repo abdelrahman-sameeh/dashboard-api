@@ -71,7 +71,7 @@ const _readExcelSheet = (filePath) => {
 
 // Helper function to send emails and log the result
 const _sendEmailsToCompanies = async (
-  emailLanguage="ar",
+  emailLanguage = "ar",
   translatedData = [],
   mailSubject,
   mailBody,
@@ -123,7 +123,7 @@ const _sendEmailsToCompanies = async (
 </html>
   `;
 
-  translatedData.forEach(companyData => {
+  translatedData.forEach((companyData) => {
     emailQueue.push({
       companyData,
       mailSubject,
@@ -131,10 +131,9 @@ const _sendEmailsToCompanies = async (
       attachments,
       clientId,
       adminId,
-      packageId
+      packageId,
     });
   });
-
 };
 
 const sendMail = asyncHandler(async (req, res, next) => {
@@ -264,10 +263,19 @@ const checkMail = async (req, res, next) => {
   }
 };
 
-module.exports = checkMail;
+const getNumberOfEmailQueueTasks = (req, res, next) => {
+  const queueLength = emailQueue.length
+  console.log(queueLength);
+  
+  return res.status(200).json({
+    status: "success",
+    data: queueLength
+  })
+};
 
 module.exports = {
   sendMail,
   getClientMails,
   checkMail,
+  getNumberOfEmailQueueTasks,
 };
