@@ -2,3 +2,4 @@
 uploads/
 run.sh
 node_modules
+logs/

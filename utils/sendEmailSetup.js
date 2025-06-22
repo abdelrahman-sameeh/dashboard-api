@@ -1,6 +1,7 @@
 const nodemailer = require("nodemailer");
 const sgMail = require("@sendgrid/mail");
 const fs = require("fs");
+const { logErrorToFile } = require("./logger");
 const {
   SENDGRID_API_KEY,
   SEND_GRID_EMAIL="HR@saajobs.com",
@@ -15,6 +16,11 @@ const _sendEmailWithSendGrid = async (to, subject, text, html, attachments) => {
     to,
     from: `'منصة سعى' <${SEND_GRID_EMAIL}>`,
     subject,
+    mailSettings: {
+      sandboxMode: {
+        enable: process.env.MODE=='dev'
+      }
+    }
   };
 
   if (text) msg.text = text;
@@ -34,9 +40,12 @@ const _sendEmailWithSendGrid = async (to, subject, text, html, attachments) => {
   }
 
   try {
-    await sgMail.send(msg);
+    const response = await sgMail.send(msg);
     return { message: "success", status: true };
   } catch (error) {
+    console.log(error, to);
+    console.log('-----------------------------------------------');
+    logErrorToFile(error, "SendGrid Email");
     return { message: error.message, status: false };
   }
 };
