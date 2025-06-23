@@ -43,7 +43,7 @@ const emailQueue = new BetterQueue(async (task, cb) => {
 }, {
   store: new MemoryStore(),
   concurrent: 100, 
-  afterProcessDelay: 1000 
+  afterProcessDelay: 10000 
 });
 
 module.exports = emailQueue;
